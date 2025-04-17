@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SONARQUBE_SERVER = 'SonarQubeServer'
+        SONAR_TOKEN = credentials('sonarqube-token')
     }
 
     stages {
@@ -27,7 +28,8 @@ pipeline {
                         -Dsonar.sources=src ^
                         -Dsonar.projectName=DevOps-Demo ^
                         -Dsonar.host.url=http://localhost:9000 ^
-                        -Dsonar.java.binaries=target/classes
+                        -Dsonar.java.binaries=target/classes ^
+                        -Dsonar.login=${SONAR_TOKEN}
                     """
                 }
             }
