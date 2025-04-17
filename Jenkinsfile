@@ -1,10 +1,13 @@
 pipeline {
     agent any
+        environment {
+            DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
+            DOCKERHUB_REPO = 'itsnotricardo/sep2-week5-class-assignment'
+            DOCKER_IMAGE_TAG = 'latest_v1'
 
-    environment {
-        SONARQUBE_SERVER = 'SonarQubeServer'
-        SONAR_TOKEN = credentials('sonarqube-token')
-    }
+            SONARQUBE_SERVER = 'SonarQubeServer'
+            SONAR_TOKEN = credentials('sonarqube-token')
+        }
 
     stages {
         stage('Checkout') {
@@ -30,6 +33,24 @@ pipeline {
                         -Dsonar.host.url=http://localhost:9000 ^
                         -Dsonar.java.binaries=target/classes
                     """
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+                    steps {
+                        script {
+                            docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                            }
+                        }
+                    }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
+                    }
                 }
             }
         }
